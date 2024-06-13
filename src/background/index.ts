@@ -22,6 +22,7 @@ chrome.action.onClicked.addListener(async (tab) => {
   });
 
   if (nextState === 'ON') {
+    console.log("on");
     await chrome.tabs.sendMessage(tabId, {
       action: 'activateHoverInspect'
     });
