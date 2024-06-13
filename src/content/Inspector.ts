@@ -11,8 +11,9 @@ class Inspector {
   private $target!: HTMLElement;
   private $cacheEl!: HTMLElement;
   private $cacheElMain!: HTMLElement;
-  private stringified!: string;
-  private serializer: XMLSerializer;
+  private selector!: string;
+  //private stringified!: string;
+  //private serializer: XMLSerializer;
   private forbidden: HTMLElement[];
 
   private renderer!: Renderer;
@@ -21,7 +22,7 @@ class Inspector {
   constructor() {
     this.bindMethods();
     this.initializeElements();
-    this.serializer = new XMLSerializer();
+    //this.serializer = new XMLSerializer();
     this.forbidden = [this.$cacheEl, document.body, document.documentElement];
   }
 
@@ -82,7 +83,7 @@ class Inspector {
 
     if (this.forbidden.indexOf(this.$target) !== -1) return;
 
-    this.stringified = this.serializer.serializeToString(this.$target);
+    this.selector = this.getSelector(this.$target);
 
     this.updateCodeOutput();
 
@@ -94,11 +95,27 @@ class Inspector {
     if (this.$cacheElMain === this.$target) return;
     this.$cacheElMain = this.$target;
 
-    this.$code.innerText = this.stringified
-      .slice(0, this.stringified.indexOf('>') + 1)
-      .replace(/ xmlns="[^"]*"/, '');
+    this.$code.innerText = this.selector;
     Prism.highlightElement(this.$code);
   }
+
+
+  private getSelector(el: HTMLElement): string {
+    if (el.id) {
+      return `#${el.id}`;
+    }
+    let path = [];
+    while (el && el.nodeType === Node.ELEMENT_NODE) {
+      let selector = el.nodeName.toLowerCase();
+      if (el.className) {
+        selector += '.' + el.className.split(' ').filter(Boolean).join('.');
+      }
+      path.unshift(selector);
+      el = el.parentElement as HTMLElement;
+    }
+    return path.join(' > ');
+  }
+
 
   registerEvents() {
     console.log('Registering events...');
