@@ -1,7 +1,7 @@
 import { defineManifest } from '@crxjs/vite-plugin'
 
 export default defineManifest({
-  name: 'chrome-element-inspector',
+  name: 'inspector',
   description: 'Chrome extension to inspect elements on a page; similar to Chrome DevTools',
   version: '0.0.0',
   manifest_version: 3,
