@@ -9,47 +9,32 @@ import ShadowDOMComponent from "./ShadowDOMComponent";
  * @extends ShadowDOMComponent
  */
 class Notification extends ShadowDOMComponent {
-  private notificationElement!: HTMLElement;
 
   constructor(shadowRoot: ShadowRoot) {
     super(shadowRoot);
     this.bindMethods();
-    this.notificationElement = this.shadowRoot.querySelector(".new-element")!;
   }
 
   protected bindMethods(): void {
-    this.displayMessage = this.displayMessage.bind(this);
+    this.copySelector = this.copySelector.bind(this);
   }
 
-  private displayMessage(message: string): void {
-    const msgDiv = document.createElement("div");
-    msgDiv.innerHTML = `<code class='tl-code language-markup' id='msgDiv'>${message}</code>`;
-    this.notificationElement.innerHTML = "";
-    this.notificationElement.appendChild(msgDiv);
-    this.notificationElement.classList.remove("show");
-    this.notificationElement.classList.add("show");
-
-    const element = this.shadowRoot.querySelector("#msgDiv");
-    if (element) {
-      Prism.highlightElement(element);
+  private copySelector(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const selector = target.dataset.selector;
+    if (selector) {
+      navigator.clipboard.writeText(selector).then(() => {
+        console.log('selector copied:', selector);
+      }).catch(err => {
+        console.error('could not copy: ', err);
+      });
     } else {
-      console.error("Element not found");
+      console.error('no selector found');
     }
-
-    setTimeout(() => {
-      if (this.notificationElement.classList.contains("show")) {
-        this.notificationElement.classList.remove("show");
-      }
-    }, 2000);
   }
 
   registerEvents(getTargetCallback: () => HTMLElement): void {
-    document.addEventListener("click", () => {
-      const target = getTargetCallback();
-      const message =
-        `You clicked on ${target.id || target.tagName}! ${Emojis[Math.floor(Math.random() * Emojis.length)]}`;
-      this.displayMessage(message);
-    });
+    document.addEventListener("click", this.copySelector);
   }
 }
 

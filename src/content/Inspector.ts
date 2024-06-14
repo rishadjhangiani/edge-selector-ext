@@ -11,7 +11,6 @@ class Inspector {
   private $target!: HTMLElement;
   private $cacheEl!: HTMLElement;
   private $cacheElMain!: HTMLElement;
-  private $copyButton!: HTMLElement;
   private selector!: string;
   //private stringified!: string;
   //private serializer: XMLSerializer;
@@ -30,7 +29,7 @@ class Inspector {
   private bindMethods(): void {
     this.logMouseMovement = this.logMouseMovement.bind(this);
     this.updateCodeOutput = this.updateCodeOutput.bind(this);
-    this.copySelector = this.copySelector.bind(this);
+    this.getSelector = this.getSelector.bind(this);
   }
 
   private initializeElements(): void {
@@ -87,6 +86,8 @@ class Inspector {
 
     this.selector = this.getSelector(this.$target);
 
+    this.$target.dataset.selector = this.selector;
+
     this.updateCodeOutput();
 
     this.$cacheEl = this.$target;
@@ -118,19 +119,10 @@ class Inspector {
     return path.join(' > ');
   }
 
-  private copySelector() {
-    navigator.clipboard.writeText(this.selector).then(() => {
-      console.log('selector copied');
-    }).catch(err => {
-      console.error('could not copy: ', err);
-    });
-  }
-
 
   registerEvents() {
     console.log('Registering events...');
     document.addEventListener('mousemove', this.logMouseMovement);
-    this.$copyButton.addEventListener('click', this.copySelector);
   }
 
   public async activate(): Promise<void> {
@@ -145,7 +137,6 @@ class Inspector {
   public deactivate(): void {
     this.$wrap.classList.add('-out');
     document.removeEventListener('mousemove', this.logMouseMovement);
-    this.$copyButton.removeEventListener('click', this.copySelector);
     setTimeout(() => {
       if (document.body.contains(this.$host)) {
         document.body.removeChild(this.$host);
